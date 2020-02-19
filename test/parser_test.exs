@@ -68,6 +68,16 @@ defmodule AutoLinker.ParserTest do
       text = "```Check out <div class='section'>google.com</div>```"
       assert parse(text, exclude_pattern: "```") == text
     end
+
+    test "links urls with schema" do
+      opts = [scheme: true, class: false, new_window: false, rel: false]
+      assert parse("foo http://google.com/foo bar", opts) == "foo <a href='http://google.com/foo'>google.com/foo</a> bar"
+      assert parse("foo https://google.com bar", opts) == "foo <a href='https://google.com'>google.com</a> bar"
+    end
+
+    test "with converter" do
+      assert parse("foo google.com bar", converter: fn(url) -> String.upcase(url) end) == "foo <a href='HTTP://GOOGLE.COM' class='auto-linker' target='_blank' rel='noopener noreferrer'>google.com</a> bar"
+    end
   end
 
   def valid_number?([list], number) do

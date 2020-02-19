@@ -35,9 +35,14 @@ defmodule AutoLinker.Builder do
     if cls = Map.get(opts, :class, "auto-linker"),
       do: [{:class, cls} | attrs], else: attrs
   end
-  defp build_attrs(attrs, url, _opts, :scheme) do
-    if String.starts_with?(url, ["http://", "https://"]),
-      do: [{:href, url} | attrs], else: [{:href, "http://" <> url} | attrs]
+  defp build_attrs(attrs, url, opts, :scheme) do
+    conv = Map.get(opts, :converter, &(&1))
+    url = cond do
+      String.starts_with?(url, ["http://", "https://"]) -> url
+      true -> "http://#{url}"
+    end
+
+    [{:href, conv.(url)} | attrs]
   end
 
   defp format_url(attrs, url, opts) do
